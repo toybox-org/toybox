@@ -27,6 +27,9 @@
         naersk' = pkgs.callPackage naersk { };
 
         buildInputs = with pkgs; [
+          udev
+          alsa-lib
+          pkg-config
         ];
 
         nativeBuildInputs = with pkgs; [
