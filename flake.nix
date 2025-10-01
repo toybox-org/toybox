@@ -12,7 +12,7 @@
       flake-utils,
       naersk,
       nixpkgs,
-      rust-overlay
+      rust-overlay,
     }:
     flake-utils.lib.eachDefaultSystem (
       system:
@@ -27,12 +27,22 @@
         naersk' = pkgs.callPackage naersk { };
 
         buildInputs = with pkgs; [
-          udev
-          alsa-lib
           pkg-config
+          libudev-zero
+          alsa-lib
+          vulkan-loader
+          libudev-zero
+          xorg.libX11
+          xorg.libXcursor
+          xorg.libXi
+          xorg.libXrandr
+          libxkbcommon
+          wayland
         ];
 
         nativeBuildInputs = with pkgs; [
+          libxkbcommon
+
           (pkgs.rust-bin.stable.latest.default.override {
             extensions = [
               "rust-src"
@@ -70,11 +80,19 @@
             }
           }/lib/rustlib/src/rust/library";
 
+          LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath (with pkgs; [
+            vulkan-loader
+            xorg.libX11
+            xorg.libXi
+            xorg.libXcursor
+            libxkbcommon
+          ]);
+
           nativeBuildInputs =
             with pkgs;
             [
+              vulkan-tools
               nixfmt
-              cmake
               rustc
               rustfmt
               cargo
