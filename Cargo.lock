@@ -4329,16 +4329,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "server"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "bevy-inspector-egui",
- "bevy_egui",
- "bevy_scriptum",
-]
-
-[[package]]
 name = "sharded-slab"
 version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4737,6 +4727,16 @@ dependencies = [
  "bevy",
  "bevy-inspector-egui",
  "bevy_egui",
+]
+
+[[package]]
+name = "toybox-server"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy-inspector-egui",
+ "bevy_egui",
+ "bevy_scriptum",
 ]
 
 [[package]]
