@@ -2,7 +2,7 @@ function on_spawn()
  print("Spawned.")
 end
 
-
+-- A player has taken control of this entity. A car get puppeted by the player Driving the car.
 function on_puppet()
 end
 
@@ -11,6 +11,6 @@ end
 
 
 function on_tick()
- print("Tick")
+ -- print("Tick")
 end
 

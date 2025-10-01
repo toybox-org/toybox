@@ -4,8 +4,9 @@ use bevy_egui::EguiPlugin;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_scriptum::prelude::*;
 use bevy_scriptum::runtimes::lua::prelude::*;
+mod networking;
 mod scripting;
-
+mod ui;
 /// Player movement speed factor.
 const PLAYER_SPEED: f32 = 250.;
 
@@ -18,11 +19,12 @@ struct Player;
 #[derive(Component)]
 struct NPC;
 
+use bevy_egui::EguiPrimaryContextPass;
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugins(EguiPlugin::default())
-        .add_plugins(WorldInspectorPlugin::default())
+        .add_plugins(ui::UIPlugin)
         .add_plugins(scripting::CoreScriptApiPlugin)
         .add_systems(Startup, (setup_scene, setup_instructions, setup_camera))
         .add_systems(Update, (move_player, update_camera).chain())
@@ -36,6 +38,9 @@ fn setup_scene(
     assets_server: Res<AssetServer>,
 ) {
     info!("Starting up the scene");
+
+    // commands.spawn(Camera2d);
+
     // Backdrop
     commands.spawn((
         Mesh2d(meshes.add(Rectangle::new(1000., 700.))),
