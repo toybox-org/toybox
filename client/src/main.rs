@@ -1,11 +1,6 @@
 use bevy::prelude::*;
 use bevy::ui::Val::Px as px;
-use bevy_egui::EguiPlugin;
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use bevy_scriptum::prelude::*;
-use bevy_scriptum::runtimes::lua::prelude::*;
 mod networking;
-mod scripting;
 mod ui;
 /// Player movement speed factor.
 const PLAYER_SPEED: f32 = 250.;
@@ -19,13 +14,10 @@ struct Player;
 #[derive(Component)]
 struct NPC;
 
-use bevy_egui::EguiPrimaryContextPass;
-
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugins(ui::UIPlugin)
-        .add_plugins(scripting::CoreScriptApiPlugin)
         .add_systems(Startup, (setup_scene, setup_instructions, setup_camera))
         .add_systems(Update, (move_player, update_camera).chain())
         .run();
@@ -51,10 +43,10 @@ fn setup_scene(
     commands.spawn((NPC, Name::new("Mary")));
     commands.spawn((NPC, Name::new("Alice")));
 
-    commands.spawn((
-        Script::<LuaScript>::new(assets_server.load("game.lua")),
-        Name::new("Game Script"),
-    ));
+    // commands.spawn((
+    //     Script::<LuaScript>::new(assets_server.load("game.lua")),
+    //     Name::new("Game Script"),
+    // ));
 
     // Player
     commands.spawn((
