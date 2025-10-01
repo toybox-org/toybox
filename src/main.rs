@@ -1,4 +1,10 @@
-use bevy::{post_process::bloom::Bloom, prelude::*};
+use bevy::prelude::*;
+use bevy::ui::Val::Px as px;
+use bevy_egui::EguiPlugin;
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use bevy_scriptum::prelude::*;
+use bevy_scriptum::runtimes::lua::prelude::*;
+mod scripting;
 
 /// Player movement speed factor.
 const PLAYER_SPEED: f32 = 250.;
@@ -9,9 +15,15 @@ const CAMERA_DECAY_RATE: f32 = 2.;
 #[derive(Component)]
 struct Player;
 
+#[derive(Component)]
+struct NPC;
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
+        .add_plugins(EguiPlugin::default())
+        .add_plugins(WorldInspectorPlugin::default())
+        .add_plugins(scripting::CoreScriptApiPlugin)
         .add_systems(Startup, (setup_scene, setup_instructions, setup_camera))
         .add_systems(Update, (move_player, update_camera).chain())
         .run();
@@ -21,11 +33,22 @@ fn setup_scene(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    assets_server: Res<AssetServer>,
 ) {
-    // World where we move the player
+    info!("Starting up the scene");
+    // Backdrop
     commands.spawn((
         Mesh2d(meshes.add(Rectangle::new(1000., 700.))),
         MeshMaterial2d(materials.add(Color::srgb(0.2, 0.2, 0.3))),
+    ));
+
+    commands.spawn((NPC, Name::new("John")));
+    commands.spawn((NPC, Name::new("Mary")));
+    commands.spawn((NPC, Name::new("Alice")));
+
+    commands.spawn((
+        Script::<LuaScript>::new(assets_server.load("game.lua")),
+        Name::new("Game Script"),
     ));
 
     // Player
@@ -35,6 +58,7 @@ fn setup_scene(
         MeshMaterial2d(materials.add(Color::srgb(0.25, 0.4, 0.1))), // RGB values exceed 1 to achieve a bright color for the bloom effect
         Transform::from_xyz(0., 0., 2.),
     ));
+    info!("Scene setup complete.");
 }
 
 fn setup_instructions(mut commands: Commands) {
@@ -42,15 +66,15 @@ fn setup_instructions(mut commands: Commands) {
         Text::new("Move the player with WASD.\nThe camera will smoothly track the player."),
         Node {
             position_type: PositionType::Absolute,
-            bottom: px(12),
-            left: px(12),
+            bottom: px(12.0),
+            left: px(12.0),
             ..default()
         },
     ));
 }
 
 fn setup_camera(mut commands: Commands) {
-    commands.spawn((Camera2d, Bloom::NATURAL));
+    commands.spawn((Camera2d,));
 }
 
 /// Update the camera position by tracking the player.
