@@ -18,11 +18,12 @@ function on_player_join(player_name)
  -- TODO: Spawn entity that can be puppeted
  ent = spawn_entity("Player-"+player_name, "PlayerCharacter")
  -- TODO: make Player control Character
- player_puppet(player_name, ent)
+ set_player_puppet(player_name, ent)
  print("Player joined...")
 end
 
-function on_player_leave()
+function on_player_leave(player_name)
+ -- TODO: Despawn entity that was puppeted.
  print("Player left...")
 end
 

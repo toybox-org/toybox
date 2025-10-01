@@ -1,5 +1,5 @@
 [package]
-name = "toybox-client"
+name = "client"
 version = "0.1.0"
 edition = "2024"
 
@@ -7,3 +7,4 @@ edition = "2024"
 bevy = "0.16"
 bevy-inspector-egui = "=0.33.1"
 bevy_egui = "0.36.0"
+bevy_console = "0.14.1"

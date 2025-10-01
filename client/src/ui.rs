@@ -13,7 +13,7 @@ impl Plugin for UIPlugin {
         })
         .add_plugins(EguiPlugin::default())
         .add_plugins(WorldInspectorPlugin::default())
-        .add_systems(EguiPrimaryContextPass, (ui_wallet, ui_msgbox));
+        .add_systems(EguiPrimaryContextPass, (ui_wallet, ui_msgbox, ui_toystash));
     }
 }
 #[derive(Resource)]
@@ -50,6 +50,22 @@ pub fn ui_msgbox(mut contexts: EguiContexts) -> Result {
     egui::Window::new("MsgBox").show(contexts.ctx_mut()?, |ui| {
         let mut text = "Hello World".to_string();
         ui.text_edit_singleline(&mut text);
+    });
+    Ok(())
+}
+
+pub fn ui_toystash(mut contexts: EguiContexts) -> Result {
+    egui::Window::new("Toy Stash").show(contexts.ctx_mut()?, |ui| {
+        let things = vec!["Palm Tree", "Shovel"];
+        for x in things {
+            ui.horizontal(|ui| {
+                if ui.button("Drop").clicked() {
+                    error!("Unsupported action.");
+                }
+
+                ui.label(x);
+            });
+        }
     });
     Ok(())
 }
