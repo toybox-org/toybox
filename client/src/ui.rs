@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, ui};
 use bevy_egui::{EguiContexts, EguiPlugin, EguiPrimaryContextPass, egui};
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
@@ -13,7 +13,7 @@ impl Plugin for UIPlugin {
         })
         .add_plugins(EguiPlugin::default())
         .add_plugins(WorldInspectorPlugin::default())
-        .add_systems(EguiPrimaryContextPass, (ui_wallet));
+        .add_systems(EguiPrimaryContextPass, (ui_wallet, ui_msgbox));
     }
 }
 #[derive(Resource)]
@@ -42,6 +42,14 @@ pub fn ui_wallet(mut contexts: EguiContexts, mut wallet: ResMut<UIWalletState>) 
         }
 
         ui.add(egui::Slider::new(&mut wallet.maximum_pool_size, 0..=100).text("GoldPool Cap"));
+    });
+    Ok(())
+}
+
+pub fn ui_msgbox(mut contexts: EguiContexts) -> Result {
+    egui::Window::new("MsgBox").show(contexts.ctx_mut()?, |ui| {
+        let mut text = "Hello World".to_string();
+        ui.text_edit_singleline(&mut text);
     });
     Ok(())
 }
