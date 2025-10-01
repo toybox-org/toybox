@@ -1,9 +1,14 @@
 function on_spawn()
- print("Spawned.")
+ local line = "Spawned as ID-(" .. entity.index .. ")"
+ print(line)
+
+
+ pass_to_rust(entity)
 end
 
 -- A player has taken control of this entity. A car get puppeted by the player Driving the car.
-function on_puppet()
+function on_puppet(player_name)
+ print("Puppeted by " .. player_name)
 end
 
 function on_unpuppet()
@@ -14,3 +19,4 @@ function on_tick()
  -- print("Tick")
 end
 
+on_spawn()

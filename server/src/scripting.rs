@@ -14,6 +14,12 @@ impl Plugin for CoreScriptApiPlugin {
                     .add_function(
                         String::from("spawn_entity_scripted"),
                         spawn_entity_named_scripted,
+                    )
+                    .add_function(
+                        String::from("pass_to_rust"),
+                        |In((entity,)): In<(BevyEntity,)>| {
+                            println!("pass_to_rust called with entity: {:?}", entity);
+                        },
                     );
             });
     }
