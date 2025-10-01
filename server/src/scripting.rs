@@ -15,6 +15,7 @@ impl Plugin for CoreScriptApiPlugin {
                         String::from("spawn_entity_scripted"),
                         spawn_entity_named_scripted,
                     )
+                    .add_function(String::from("set_postition"), set_postition)
                     .add_function(
                         String::from("pass_to_rust"),
                         |In((entity,)): In<(BevyEntity,)>| {
@@ -59,6 +60,9 @@ pub fn spawn_entity_named_scripted(
     In((name, script_name)): In<(String, String)>,
     mut commands: Commands,
     assets_server: Res<AssetServer>,
+
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     let request = SpawnRequest {
         toy_name: name,
@@ -69,6 +73,9 @@ pub fn spawn_entity_named_scripted(
     commands.spawn((
         Script::<LuaScript>::new(assets_server.load("entity_script.lua")),
         Name::new(request.toy_name),
+        Transform::from_xyz(0., 0., 0.),
+        Mesh2d(meshes.add(Circle::new(25.))),
+        MeshMaterial2d(materials.add(Color::srgb(0.25, 0.4, 0.1))),
     ));
 }
 
@@ -82,4 +89,12 @@ fn call_lua_on_update_from_rust(
             .call_fn("on_tick", &mut script_data, entity, ())
             .unwrap();
     }
+}
+
+fn set_postition(
+    In((entity, translation)): In<(BevyEntity, BevyVec3)>,
+    mut entities: Query<&mut Transform>,
+) {
+    let mut transform = entities.get_mut(entity.0).unwrap();
+    transform.translation = translation.0;
 }

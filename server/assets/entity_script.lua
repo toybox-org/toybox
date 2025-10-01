@@ -1,7 +1,8 @@
 function on_spawn()
  local line = "Spawned as ID-(" .. entity.index .. ")"
  print(line)
-
+ my_vec = Vec3(1, 200, 3)
+ set_postition(entity, my_vec)
 
  pass_to_rust(entity)
 end
