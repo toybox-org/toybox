@@ -1,5 +1,5 @@
 use bevy::{prelude::*, ui};
-use bevy_egui::{EguiContexts, EguiPlugin, EguiPrimaryContextPass, egui};
+use bevy_egui::{egui, EguiContexts, EguiPlugin, EguiPrimaryContextPass};
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 pub struct UIPlugin;
@@ -11,8 +11,6 @@ impl Plugin for UIPlugin {
             current_swap_rate: 0,
             gold_pool: 0,
         })
-        .add_plugins(EguiPlugin::default())
-        .add_plugins(WorldInspectorPlugin::default())
         .add_systems(EguiPrimaryContextPass, (ui_wallet, ui_msgbox, ui_toystash));
     }
 }

@@ -1,164 +1,40 @@
+//! This example showcases how to use Lightyear with Bevy, to easily get replication along with prediction/interpolation working.
+//!
+//! There is a lot of setup code, but it's mostly to have the examples work in all possible configurations of transport.
+//! (all transports are supported, as well as running the example in client-and-server or host-server mode)
+//!
+//!
+//! Run with
+//! - `cargo run -- server`
+//! - `cargo run -- client -c 1`
+#![allow(unused_imports)]
+#![allow(unused_variables)]
+#![allow(dead_code)]
+
+use crate::client::ExampleClientPlugin;
 use bevy::prelude::*;
-use bevy::ui::Val::Px as px;
-mod networking;
+use core::time::Duration;
+use lightyear_examples_common::cli::{Cli, Mode};
+use lightyear_examples_common::shared::FIXED_TIMESTEP_HZ;
+use shared::plugin::SharedPlugin;
+
+mod client;
+mod renderer;
 mod ui;
-/// Player movement speed factor.
-const PLAYER_SPEED: f32 = 250.;
-
-/// How quickly should the camera snap to the desired location.
-const CAMERA_DECAY_RATE: f32 = 2.;
-
-#[derive(Component)]
-struct Player;
-
-#[derive(Component)]
-struct NPC;
-
+/// When running the example as a binary, we only support Client or Server mode.
 fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins)
-        .add_plugins(ui::UIPlugin)
-        .add_systems(Startup, (setup_scene, setup_instructions, setup_camera))
-        .add_systems(Update, (move_player, update_camera).chain())
-        .run();
-}
+    let cli = Cli::default();
 
-fn setup_scene(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-    assets_server: Res<AssetServer>,
-) {
-    info!("Starting up the scene");
+    let mut app = cli.build_app(Duration::from_secs_f64(1.0 / FIXED_TIMESTEP_HZ), true);
 
-    // commands.spawn(Camera2d);
+    app.add_plugins(SharedPlugin);
 
-    // Backdrop
-    commands.spawn((
-        Mesh2d(meshes.add(Rectangle::new(1000., 700.))),
-        MeshMaterial2d(materials.add(Color::srgb(0.2, 0.2, 0.3))),
-    ));
+    cli.spawn_connections(&mut app);
 
-    commands.spawn((NPC, Name::new("John")));
-    commands.spawn((NPC, Name::new("Mary")));
-    commands.spawn((NPC, Name::new("Alice")));
+    app.add_plugins(ExampleClientPlugin)
+        .add_plugins(ui::UIPlugin);
 
-    // commands.spawn((
-    //     Script::<LuaScript>::new(assets_server.load("game.lua")),
-    //     Name::new("Game Script"),
-    // ));
+    app.add_plugins(renderer::ExampleRendererPlugin);
 
-    // Player
-    commands.spawn((
-        Player,
-        Mesh2d(meshes.add(Circle::new(25.))),
-        MeshMaterial2d(materials.add(Color::srgb(0.25, 0.4, 0.1))), // RGB values exceed 1 to achieve a bright color for the bloom effect
-        Transform::from_xyz(0., 0., 2.),
-    ));
-    info!("Scene setup complete.");
-}
-
-fn setup_instructions(mut commands: Commands) {
-    commands.spawn((
-        Text::new("Move the player with WASD.\nThe camera will smoothly track the player."),
-        Node {
-            position_type: PositionType::Absolute,
-            bottom: px(12.0),
-            left: px(12.0),
-            ..default()
-        },
-    ));
-}
-
-fn setup_camera(mut commands: Commands) {
-    commands.spawn((Camera2d,));
-}
-
-/// Update the camera position by tracking the player.
-fn update_camera(
-    mut camera: Single<&mut Transform, (With<Camera2d>, Without<Player>)>,
-    player: Single<&Transform, (With<Player>, Without<Camera2d>)>,
-    time: Res<Time>,
-) {
-    let Vec3 { x, y, .. } = player.translation;
-    let direction = Vec3::new(x, y, camera.translation.z);
-
-    // Applies a smooth effect to camera movement using stable interpolation
-    // between the camera position and the player position on the x and y axes.
-    camera
-        .translation
-        .smooth_nudge(&direction, CAMERA_DECAY_RATE, time.delta_secs());
-}
-
-/// Update the player position with keyboard inputs.
-/// Note that the approach used here is for demonstration purposes only,
-/// as the point of this example is to showcase the camera tracking feature.
-///
-/// A more robust solution for player movement can be found in `examples/movement/physics_in_fixed_timestep.rs`.
-fn move_player(
-    mut player: Single<&mut Transform, With<Player>>,
-    time: Res<Time>,
-    kb_input: Res<ButtonInput<KeyCode>>,
-) {
-    let mut direction = Vec2::ZERO;
-
-    if kb_input.pressed(KeyCode::KeyW) {
-        direction.y += 1.;
-    }
-
-    if kb_input.pressed(KeyCode::KeyS) {
-        direction.y -= 1.;
-    }
-
-    if kb_input.pressed(KeyCode::KeyA) {
-        direction.x -= 1.;
-    }
-
-    if kb_input.pressed(KeyCode::KeyD) {
-        direction.x += 1.;
-    }
-
-    {
-        // Numpad
-        if kb_input.pressed(KeyCode::Numpad4) {
-            direction.x -= 1.0;
-        }
-
-        if kb_input.pressed(KeyCode::Numpad6) {
-            direction.x += 1.0;
-        }
-
-        if kb_input.pressed(KeyCode::Numpad1) {
-            direction.y -= 1.;
-            direction.x -= 1.;
-        }
-
-        if kb_input.pressed(KeyCode::Numpad3) {
-            direction.y -= 1.;
-            direction.x += 1.;
-        }
-
-        if kb_input.pressed(KeyCode::Numpad7) {
-            direction.y += 1.;
-            direction.x -= 1.;
-        }
-
-        if kb_input.pressed(KeyCode::Numpad9) {
-            direction.y += 1.;
-            direction.x += 1.;
-        }
-
-        if kb_input.pressed(KeyCode::Numpad2) {
-            direction.y -= 1.0;
-        }
-
-        if kb_input.pressed(KeyCode::Numpad8) {
-            direction.y += 1.0;
-        }
-    }
-    // Progressively update the player's position over time. Normalize the
-    // direction vector to prevent it from exceeding a magnitude of 1 when
-    // moving diagonally.
-    let move_delta = direction.normalize_or_zero() * PLAYER_SPEED * time.delta_secs();
-    player.translation += move_delta.extend(0.);
+    app.run();
 }
