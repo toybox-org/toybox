@@ -6963,17 +6963,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "server"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "bevy-inspector-egui",
- "bevy_egui 0.36.0",
- "bevy_scriptum",
- "shared",
-]
-
-[[package]]
 name = "server_net"
 version = "0.1.0"
 dependencies = [
@@ -6981,6 +6970,7 @@ dependencies = [
  "bevy-inspector-egui",
  "bevy_console",
  "bevy_egui 0.36.0",
+ "bevy_scriptum",
  "bincode",
  "bytes",
  "lightyear",

@@ -8,6 +8,7 @@ pub struct CoreScriptApiPlugin;
 
 impl Plugin for CoreScriptApiPlugin {
     fn build(&self, app: &mut App) {
+        println!("SCRIPTING");
         app.add_systems(Update, call_lua_on_update_from_rust)
             .add_scripting::<LuaRuntime>(|runtime| {
                 runtime

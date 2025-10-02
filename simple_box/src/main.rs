@@ -11,22 +11,15 @@
 #![allow(unused_variables)]
 #![allow(dead_code)]
 
-#[cfg(feature = "client")]
 use crate::client::ExampleClientPlugin;
-#[cfg(feature = "server")]
-use crate::server::ExampleServerPlugin;
 use bevy::prelude::*;
 use core::time::Duration;
 use lightyear_examples_common::cli::{Cli, Mode};
 use lightyear_examples_common::shared::FIXED_TIMESTEP_HZ;
 use shared::plugin::SharedPlugin;
 
-#[cfg(feature = "client")]
 mod client;
-#[cfg(feature = "gui")]
 mod renderer;
-#[cfg(feature = "server")]
-mod server;
 
 /// When running the example as a binary, we only support Client or Server mode.
 fn main() {
@@ -38,24 +31,8 @@ fn main() {
 
     cli.spawn_connections(&mut app);
 
-    match cli.mode {
-        #[cfg(feature = "client")]
-        Some(Mode::Client { .. }) => {
-            app.add_plugins(ExampleClientPlugin);
-        }
-        #[cfg(feature = "server")]
-        Some(Mode::Server) => {
-            app.add_plugins(ExampleServerPlugin);
-        }
-        #[cfg(all(feature = "client", feature = "server"))]
-        Some(Mode::HostClient { client_id }) => {
-            app.add_plugins(ExampleClientPlugin);
-            app.add_plugins(ExampleServerPlugin);
-        }
-        _ => {}
-    }
+    app.add_plugins(ExampleClientPlugin);
 
-    #[cfg(feature = "gui")]
     app.add_plugins(renderer::ExampleRendererPlugin);
 
     app.run();

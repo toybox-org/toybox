@@ -11,6 +11,9 @@ use bevy::prelude::*;
 use lightyear::prelude::*;
 use serde::{Deserialize, Serialize};
 
+#[derive(Component)]
+pub struct NPC;
+
 // Player
 #[derive(Bundle)]
 pub struct PlayerBundle {

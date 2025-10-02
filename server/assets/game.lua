@@ -4,7 +4,7 @@ function launch()
  game_settings = {
   name = "value",
  }
-
+ print("Launching game script...")
  spawn_entity()
  spawn_entity_named("MyToy")
  spawn_entity_scripted("MyOtherToy", "entity_script.lua")
