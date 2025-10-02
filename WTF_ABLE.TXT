@@ -1,0 +1,17 @@
+uh ok so 
+
+>common/
+comes from lightyear and is the shared library for all their demos.
+
+>server/
+this is the lua scriptable server
+
+>client
+
+this is the non scriptable non-networked client
+
+>server_net/
+this is the networked server
+
+> simple_box/
+this is the networked client stolen from lightyear

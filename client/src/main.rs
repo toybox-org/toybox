@@ -118,6 +118,44 @@ fn move_player(
         direction.x += 1.;
     }
 
+    {
+        // Numpad
+        if kb_input.pressed(KeyCode::Numpad4) {
+            direction.x -= 1.0;
+        }
+
+        if kb_input.pressed(KeyCode::Numpad6) {
+            direction.x += 1.0;
+        }
+
+        if kb_input.pressed(KeyCode::Numpad1) {
+            direction.y -= 1.;
+            direction.x -= 1.;
+        }
+
+        if kb_input.pressed(KeyCode::Numpad3) {
+            direction.y -= 1.;
+            direction.x += 1.;
+        }
+
+        if kb_input.pressed(KeyCode::Numpad7) {
+            direction.y += 1.;
+            direction.x -= 1.;
+        }
+
+        if kb_input.pressed(KeyCode::Numpad9) {
+            direction.y += 1.;
+            direction.x += 1.;
+        }
+
+        if kb_input.pressed(KeyCode::Numpad2) {
+            direction.y -= 1.0;
+        }
+
+        if kb_input.pressed(KeyCode::Numpad8) {
+            direction.y += 1.0;
+        }
+    }
     // Progressively update the player's position over time. Normalize the
     // direction vector to prevent it from exceeding a magnitude of 1 when
     // moving diagonally.

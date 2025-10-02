@@ -1,0 +1,76 @@
+[package]
+name = "lightyear_examples_common"
+version = "0.1.0"
+authors = ["Charles Bournhonesque <charlesbour@gmail.com>"]
+edition = "2021"
+description = "Examples for the lightyearServer-client networking library for the Bevy game engine"
+readme = "README.md"
+repository = "https://github.com/cBournhonesque/lightyear"
+keywords = ["bevy", "multiplayer", "networking", "netcode", "gamedev"]
+categories = ["game-development", "network-programming"]
+license = "MIT OR Apache-2.0"
+publish = false
+
+
+[features]
+default = ["client", "server", "netcode", "udp"]
+client = ["lightyear/client"]
+server = ["lightyear/server"]
+netcode = ["lightyear/netcode"]
+udp = ["lightyear/udp"]
+# steam = ["lightyear/steam"]
+# visualizer = ["gui", "lightyear/metrics", "dep:bevy_metrics_dashboard"]
+# debug = ["gui", "lightyear/metrics"]
+
+# this serves as a bit of "workspace-hack" crate by enabling all bevy features needed by examples.
+# you can read about workspace-hack crates here: https://docs.rs/cargo-hakari/latest/cargo_hakari/about/index.html
+# even though we're not using cargo-hakari.
+
+gui = [
+  "bevy/bevy_asset",
+  "bevy/bevy_render",
+  "bevy/bevy_pbr",
+  "bevy/bevy_scene",
+  "bevy/bevy_core_pipeline",
+  "bevy/bevy_gizmos",
+  "bevy/tonemapping_luts",
+  "bevy/smaa_luts",
+  "bevy/default_font",
+  "bevy/png",
+  "bevy/hdr",
+  "bevy/x11",
+  "bevy/webgl2",
+  "bevy/bevy_winit",
+  "bevy/bevy_picking",
+  "bevy/bevy_sprite",
+  "bevy/bevy_text",
+  "bevy/bevy_ui",
+  "bevy/bevy_ui_picking_backend",
+  "bevy/bevy_window",
+]
+
+[dependencies]
+lightyear = { version = "0.24.2", features = [
+  "interpolation",
+  "prediction",
+  "replication",
+  "webtransport",
+  "webtransport_self_signed",
+  "webtransport_dangerous_configuration",
+  "websocket",
+  "websocket_self_signed",
+  "udp",
+] }
+async-compat = "0.2.3"
+cfg-if = "1.0"
+clap = { version = "4.5.4", features = ["derive"] }
+serde = { version = "1", default-features = false, features = [
+  "alloc",
+  "derive",
+] }
+bevy = { version = "0.16", features = ["bevy_state", "bevy_log"] }
+
+bevy-inspector-egui = "=0.33.1"
+bevy_egui = "0.36.0"
+bevy_console = "0.14.1"
+tracing = "0.1.40"

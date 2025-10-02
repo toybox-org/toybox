@@ -22,10 +22,10 @@ end
 --  print("Player joined...")
 -- end
 
--- function on_player_leave(player_name)
+function on_player_leave(player_name)
 --  -- TODO: Despawn entity that was puppeted.
 --  print("Player left...")
--- end
+end
 
 
 launch()

@@ -2,6 +2,8 @@ use bevy::prelude::*;
 use bevy_scriptum::prelude::*;
 use bevy_scriptum::runtimes::lua::prelude::*;
 
+pub type PlayerName = String;
+
 pub struct CoreScriptApiPlugin;
 
 impl Plugin for CoreScriptApiPlugin {
