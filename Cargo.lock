@@ -6986,6 +6986,7 @@ dependencies = [
  "lightyear",
  "lightyear_examples_common",
  "serde",
+ "shared",
 ]
 
 [[package]]

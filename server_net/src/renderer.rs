@@ -1,6 +1,6 @@
-use crate::protocol::*;
 use bevy::prelude::*;
 use lightyear::prelude::Confirmed;
+use shared::protocol::{PlayerColor, PlayerPosition};
 
 #[derive(Clone)]
 pub struct ExampleRendererPlugin;

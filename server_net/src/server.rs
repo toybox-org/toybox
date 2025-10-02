@@ -6,8 +6,8 @@
 //! - read inputs from the clients and move the player entities accordingly
 //!
 //! Lightyear will handle the replication of entities automatically if you add a `Replicate` component to them.
-use crate::protocol::*;
-use crate::shared;
+use shared::protocol::*;
+
 use bevy::prelude::*;
 use lightyear::connection::client::Connected;
 use lightyear::prelude::input::native::*;
@@ -85,7 +85,7 @@ fn movement(
     let tick = timeline.tick();
     for (position, inputs) in position_query.iter_mut() {
         trace!(?tick, ?position, ?inputs, "server");
-        shared::shared_movement_behaviour(position, inputs);
+        shared::plugin::shared_movement_behaviour(position, inputs);
     }
 }
 

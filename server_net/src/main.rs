@@ -13,20 +13,16 @@
 
 #[cfg(feature = "server")]
 use crate::server::ExampleServerPlugin;
-use crate::shared::SharedPlugin;
 use bevy::prelude::*;
 use core::time::Duration;
 use lightyear_examples_common::cli::{Cli, Mode};
-
 use lightyear_examples_common::shared::FIXED_TIMESTEP_HZ;
+use shared::plugin::SharedPlugin;
 
-mod protocol;
 #[cfg(feature = "gui")]
 mod renderer;
 #[cfg(feature = "server")]
 mod server;
-
-mod shared;
 
 /// When running the example as a binary, we only support Client or Server mode.
 fn main() {
