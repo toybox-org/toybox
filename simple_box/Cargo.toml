@@ -22,6 +22,7 @@ udp = ["lightyear_examples_common/udp"]
 
 
 [dependencies]
+shared = { path = "../shared" }
 lightyear = { version = "0.24.2", features = [
   "interpolation",
   "prediction",

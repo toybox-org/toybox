@@ -1,99 +1,143 @@
-//! This module contains the shared code between the client and the server.
+//! This file contains the shared Protocol that defines the messages that can be sent between the client and server.
 //!
-//! The simulation logic (movement, etc.) should be shared between client and server to guarantee that there won't be
-//! mispredictions/rollbacks.
-use crate::protocol::*;
+//! You will need to define the Components, Messages and Inputs that make up the protocol.
+//! You can use the `#[protocol]` attribute to specify additional behaviour:
+//! - how entities contained in the message should be mapped from the remote world to the local world
+//! - how the component should be synchronized between the `Confirmed` entity and the `Predicted`/`Interpolated` entity
+
+use bevy::ecs::entity::MapEntities;
+use bevy::math::Curve;
 use bevy::prelude::*;
-use lightyear::connection::client_of::ClientOf;
 use lightyear::prelude::*;
-use lightyear_examples_common::shared::SharedSettings;
+use serde::{Deserialize, Serialize};
 
-pub struct SharedPlugin;
+// Player
+#[derive(Bundle)]
+pub struct PlayerBundle {
+    pub id: PlayerId,
+    pub position: PlayerPosition,
+    pub color: PlayerColor,
+}
 
-impl Plugin for SharedPlugin {
+impl PlayerBundle {
+    pub fn new(id: PeerId, position: Vec2) -> Self {
+        // Generate pseudo random color from client id.
+        let h = (((id.to_bits().wrapping_mul(30)) % 360) as f32) / 360.0;
+        let s = 0.8;
+        let l = 0.5;
+        let color = Color::hsl(h, s, l);
+        Self {
+            id: PlayerId(id),
+            position: PlayerPosition(position),
+            color: PlayerColor(color),
+        }
+    }
+}
+
+// Components
+
+#[derive(Component, Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct PlayerId(PeerId);
+
+#[derive(Component, Serialize, Deserialize, Clone, Debug, PartialEq, Deref, DerefMut)]
+pub struct PlayerPosition(pub Vec2);
+
+impl Ease for PlayerPosition {
+    fn interpolating_curve_unbounded(start: Self, end: Self) -> impl Curve<Self> {
+        FunctionCurve::new(Interval::UNIT, move |t| {
+            PlayerPosition(Vec2::lerp(start.0, end.0, t))
+        })
+    }
+}
+
+#[derive(Component, Deserialize, Serialize, Clone, Debug, PartialEq)]
+pub struct PlayerColor(pub Color);
+
+// Example of a component that contains an entity.
+// This component, when replicated, needs to have the inner entity mapped from the Server world
+// to the client World.
+// You will need to derive the `MapEntities` trait for the component, and register
+// app.add_map_entities<PlayerParent>() in your protocol
+#[derive(Component, Deserialize, Serialize, Clone, Debug, PartialEq)]
+pub struct PlayerParent(Entity);
+
+impl MapEntities for PlayerParent {
+    fn map_entities<M: EntityMapper>(&mut self, entity_mapper: &mut M) {
+        self.0 = entity_mapper.get_mapped(self.0);
+    }
+}
+
+// Channels
+pub struct Channel1;
+
+// Messages
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct Message1(pub usize);
+
+// Inputs
+
+#[derive(Serialize, Deserialize, Debug, Default, PartialEq, Eq, Clone, Reflect)]
+pub struct Direction {
+    pub up: bool,
+    pub down: bool,
+    pub left: bool,
+    pub right: bool,
+}
+
+impl Direction {
+    pub(crate) fn is_none(&self) -> bool {
+        !self.up && !self.down && !self.left && !self.right
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone, Reflect)]
+pub enum Inputs {
+    Direction(Direction),
+}
+
+impl Default for Inputs {
+    fn default() -> Self {
+        Self::Direction(Direction::default())
+    }
+}
+
+impl MapEntities for Inputs {
+    fn map_entities<M: EntityMapper>(&mut self, entity_mapper: &mut M) {}
+}
+
+// Protocol
+#[derive(Clone)]
+pub struct ProtocolPlugin;
+
+impl Plugin for ProtocolPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(ProtocolPlugin);
-        app.add_systems(FixedPostUpdate, fixed_post_log);
-        app.add_systems(Update, confirmed_log);
-        app.add_systems(PostUpdate, interpolate_log);
-    }
-}
+        app.register_type::<Inputs>();
+        // messages
+        app.add_message::<Message1>()
+            .add_direction(NetworkDirection::ServerToClient);
 
-pub const SHARED_SETTINGS: SharedSettings = SharedSettings {
-    protocol_id: 0,
-    private_key: [0; 32],
-};
+        // inputs
+        app.add_plugins(input::native::InputPlugin::<Inputs>::default());
+        // components
+        app.register_component::<PlayerId>()
+            .add_prediction(PredictionMode::Once)
+            .add_interpolation(InterpolationMode::Once);
 
-// This system defines how we update the player's positions when we receive an input
-pub(crate) fn shared_movement_behaviour(mut position: Mut<PlayerPosition>, input: &Inputs) {
-    const MOVE_SPEED: f32 = 10.0;
-    let Inputs::Direction(direction) = input;
-    if direction.up {
-        position.y += MOVE_SPEED;
-    }
-    if direction.down {
-        position.y -= MOVE_SPEED;
-    }
-    if direction.left {
-        position.x -= MOVE_SPEED;
-    }
-    if direction.right {
-        position.x += MOVE_SPEED;
-    }
-}
+        app.register_component::<PlayerPosition>()
+            .add_prediction(PredictionMode::Full)
+            .add_interpolation(InterpolationMode::Full)
+            .add_linear_interpolation_fn();
 
-pub(crate) fn confirmed_log(
-    timeline: Single<&LocalTimeline, With<Client>>,
-    players: Query<(Entity, &PlayerPosition), Changed<Confirmed>>,
-) {
-    let tick = timeline.tick();
-    for status in players.iter() {
-        trace!(?tick, ?status, "Confirmed Updated");
-    }
-}
+        app.register_component::<PlayerColor>()
+            .add_prediction(PredictionMode::Once)
+            .add_interpolation(InterpolationMode::Once);
 
-pub(crate) fn interpolate_log(
-    timeline: Single<
-        (&LocalTimeline, &InterpolationTimeline),
-        Or<(With<Client>, Without<ClientOf>)>,
-    >,
-    players: Query<
-        (Entity, &PlayerPosition, &ConfirmedHistory<PlayerPosition>),
-        With<Interpolated>,
-    >,
-) {
-    let (timeline, interpolation_timeline) = timeline.into_inner();
-    let tick = timeline.tick();
-    let interpolation_tick = interpolation_timeline.tick();
-    for status in players.iter() {
-        trace!(?tick, ?interpolation_tick, ?status, "Interpolation");
-    }
-}
-
-pub(crate) fn fixed_post_log(
-    timeline: Single<
-        (&LocalTimeline, Has<Rollback>),
-        // Without<Client>
-        Or<(With<Client>, Without<ClientOf>)>,
-    >,
-    players: Query<
-        (Entity, &PlayerPosition),
-        // (Entity, &PlayerPosition, &ActionState<Inputs>, &InputBuffer<ActionState<Inputs>>),
-        (Without<Confirmed>, With<PlayerId>),
-    >,
-) {
-    let (timeline, rollback) = timeline.into_inner();
-    let tick = timeline.tick();
-    // for (entity, position, action_state, input_buffer) in players.iter() {
-    for (entity, position) in players.iter() {
-        trace!(
-            ?rollback,
-            ?tick,
-            ?entity,
-            ?position,
-            // ?action_state,
-            // %input_buffer,
-            "Player after movement"
-        );
+        // channels
+        app.add_channel::<Channel1>(ChannelSettings {
+            mode: ChannelMode::OrderedReliable(ReliableSettings::default()),
+            ..default()
+        })
+        .add_direction(NetworkDirection::ServerToClient);
     }
 }

@@ -5,13 +5,13 @@
 //! - applying inputs to the locally predicted player (for prediction to work, inputs have to be applied to both the
 //!   predicted entity and the server entity)
 
-use crate::protocol::Direction;
-use crate::protocol::*;
-use crate::shared;
 use bevy::prelude::*;
 use lightyear::prelude::client::input::*;
 use lightyear::prelude::input::native::*;
 use lightyear::prelude::*;
+use shared::plugin::shared_movement_behaviour;
+use shared::protocol::Direction;
+use shared::protocol::*;
 
 pub struct ExampleClientPlugin;
 
@@ -77,7 +77,7 @@ fn player_movement(
         // trace!(?tick, ?position, ?input, "client");
         // NOTE: be careful to directly pass Mut<PlayerPosition>
         // getting a mutable reference triggers change detection, unless you use `as_deref_mut()`
-        shared::shared_movement_behaviour(position, input);
+        shared_movement_behaviour(position, input);
     }
 }
 

@@ -8,3 +8,25 @@ bevy = "0.16"
 bevy_scriptum = { version = "0.9", features = ["lua"] }
 bevy-inspector-egui = "=0.33.1"
 bevy_egui = "0.36.0"
+lightyear = { version = "0.24.2", features = [
+ "interpolation",
+ "prediction",
+ "replication",
+ "input_native",
+] }
+lightyear_examples_common = { path = "../common" }
+# serde.workspace = true
+
+
+bincode = { version = "2.0.1", default-features = false, features = [
+ "serde",
+ "alloc",
+] }
+bytes = { version = "1.8", default-features = false, features = ["serde"] }
+serde = { version = "1", default-features = false, features = [
+ "alloc",
+ "derive",
+] }
+
+
+bevy_console = "0.14.1"

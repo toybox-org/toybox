@@ -14,4 +14,9 @@ this is the non scriptable non-networked client
 this is the networked server
 
 > simple_box/
-this is the networked client stolen from lightyear
+this is the networked client stolen from lightyear.
+More code needs to come out of it and go elsewhere.
+
+
+> shared/
+this is the shared library for OUR code.

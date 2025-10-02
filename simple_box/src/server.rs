@@ -6,14 +6,14 @@
 //! - read inputs from the clients and move the player entities accordingly
 //!
 //! Lightyear will handle the replication of entities automatically if you add a `Replicate` component to them.
-use crate::protocol::*;
-use crate::shared;
 use bevy::prelude::*;
 use lightyear::connection::client::Connected;
 use lightyear::prelude::input::native::*;
 use lightyear::prelude::server::*;
 use lightyear::prelude::*;
 use lightyear_examples_common::shared::SEND_INTERVAL;
+use shared::plugin::shared_movement_behaviour;
+use shared::protocol::*;
 
 pub struct ExampleServerPlugin;
 
@@ -55,7 +55,7 @@ pub(crate) fn handle_connected(
     let client_id = client_id.0;
     let entity = commands
         .spawn((
-            PlayerBundle::new(client_id, Vec2::ZERO),
+            shared::protocol::PlayerBundle::new(client_id, Vec2::ZERO),
             // we replicate the Player entity to all clients that are connected to this server
             Replicate::to_clients(NetworkTarget::All),
             PredictionTarget::to_clients(NetworkTarget::Single(client_id)),
@@ -85,7 +85,7 @@ fn movement(
     let tick = timeline.tick();
     for (position, inputs) in position_query.iter_mut() {
         trace!(?tick, ?position, ?inputs, "server");
-        shared::shared_movement_behaviour(position, inputs);
+        shared_movement_behaviour(position, inputs);
     }
 }
 

@@ -7025,8 +7025,14 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy-inspector-egui",
+ "bevy_console",
  "bevy_egui 0.36.0",
  "bevy_scriptum",
+ "bincode",
+ "bytes",
+ "lightyear",
+ "lightyear_examples_common",
+ "serde",
 ]
 
 [[package]]
@@ -7076,6 +7082,7 @@ dependencies = [
  "lightyear",
  "lightyear_examples_common",
  "serde",
+ "shared",
 ]
 
 [[package]]
