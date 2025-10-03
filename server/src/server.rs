@@ -70,7 +70,7 @@ pub(crate) fn handle_connected(
         "Create player entity {:?} for client {:?}",
         entity, client_id
     );
-    // TODO: Fire player_join event
+    // TODO: Fire player_join event into any `GameScript`s
 }
 
 /// Read client inputs and move players in server therefore giving a basis for other clients
