@@ -23,6 +23,7 @@ use shared::protocol::NPC;
 
 mod scripting;
 
+mod npc;
 mod renderer;
 mod server;
 
@@ -40,6 +41,7 @@ fn main() {
     app.add_plugins(ExampleServerPlugin);
     println!("BEGOR");
     app.add_plugins(scripting::CoreScriptApiPlugin);
+    app.add_plugins(npc::NpcPlugin);
     app.add_systems(Startup, server_setup);
 
     #[cfg(feature = "gui")]

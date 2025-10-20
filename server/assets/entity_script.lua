@@ -3,6 +3,7 @@ function on_spawn()
  print(line)
  my_vec = Vec3(1, 200, 3)
  set_postition(entity, my_vec)
+ set_name(entity, "Chad")
 
  pass_to_rust(entity)
 end

@@ -4,7 +4,7 @@ uh ok so
 comes from lightyear and is the shared library for all their demos.
 
 >server/
->client
+>client/
 
 > shared/
 this is the shared library for OUR code.

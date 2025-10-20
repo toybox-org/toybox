@@ -19,6 +19,7 @@ impl Plugin for CoreScriptApiPlugin {
                         spawn_entity_named_scripted,
                     )
                     .add_function(String::from("set_postition"), set_postition)
+                    .add_function(String::from("set_name"), set_name)
                     .add_function(
                         String::from("pass_to_rust"),
                         |In((entity,)): In<(BevyEntity,)>| {
@@ -86,7 +87,9 @@ fn call_lua_on_update_from_rust(
     mut scripted_entities: Query<(Entity, &mut LuaScriptData)>,
     scripting_runtime: ResMut<LuaRuntime>,
 ) {
+    info!("Firing `on_tick` for scripted entities");
     for (entity, mut script_data) in &mut scripted_entities {
+        // TODO: Handle no `on_tick` function existing.
         // calling function named `on_update` defined in lua script
         scripting_runtime
             .call_fn("on_tick", &mut script_data, entity, ())
@@ -100,4 +103,9 @@ fn set_postition(
 ) {
     let mut transform = entities.get_mut(entity.0).unwrap();
     transform.translation = translation.0;
+}
+
+fn set_name(In((entity, name)): In<(BevyEntity, String)>, mut entities: Query<&mut Name>) {
+    let mut transform = entities.get_mut(entity.0).unwrap();
+    *transform = Name::new(name);
 }
